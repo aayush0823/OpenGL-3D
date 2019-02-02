@@ -36,18 +36,18 @@ void draw() {
     // Eye - Location of camera. Don't change unless you are sure!!
     if(top==0)
     {
-   		eye = glm::vec3( 5*cos(camera_rotation_angle*M_PI/180.0f), 0, 5*sin(camera_rotation_angle*M_PI/180.0f) );
+   		eye = glm::vec3( player.position.x + 20, player.position.y +20, 10);
     // Target - Where is the camera looking at.  Don't change unless you are sure!!
-    	target = glm::vec3(0, 0, 0);
+    	target = glm::vec3(player.position.x , player.position.y , player.position.z);
     // Up - Up vector defines tilt of camera.  Don't change unless you are sure!!
    		up = glm::vec3(0, 1, 0);
 	}
 	else
 	{
 
-		eye = glm::vec3( -2, -0.4, -2);
+		eye = glm::vec3( player.position.x , player.position.y , player.position.z - 3);
     // Target - Where is the camera looking at.  Don't change unless you are sure!!
-    	target = glm::vec3(-2, -0.4, 0);
+    	target = glm::vec3(player.position.x , player.position.y , player.position.z);
     // Up - Up vector defines tilt of camera.  Don't change unless you are sure!!
    		up = glm::vec3(0, 1, 0);
 	}
@@ -76,8 +76,16 @@ void tick_input(GLFWwindow *window) {
     int right  = glfwGetKey(window, GLFW_KEY_RIGHT);
     int back  = glfwGetKey(window, GLFW_KEY_DOWN);
     int up  = glfwGetKey(window, GLFW_KEY_SPACE);
-    int c = glfwGetKey(window, GLFW_KEY_C);
-    if (c && change  == 0 ) {
+    int v = glfwGetKey(window, GLFW_KEY_V);
+    int d = glfwGetKey(window, GLFW_KEY_D);
+    int a = glfwGetKey(window, GLFW_KEY_A);
+    int w = glfwGetKey(window, GLFW_KEY_W);
+    int s = glfwGetKey(window, GLFW_KEY_S);
+    
+    if(a)player.rotate(1);
+    if(d)player.rotate(2);
+    
+    if (v && change  == 0 ) {
     	top = 1- top;
         change = 1;
     }
@@ -97,12 +105,12 @@ void tick_input(GLFWwindow *window) {
     {
     	player.tick(4);
     }
-    else if(up)
+    else if(w)
     {
     	player.tick(5);
     }
-    // else
-    	// player.tick(4);
+    else if(s)
+    	player.tick(6);
 }
 
 void tick_elements() {
@@ -115,8 +123,8 @@ void initGL(GLFWwindow *window, int width, int height) {
     /* Objects should be created before any other gl function and shaders */
     // Create the models
 
-    player       = Ball(-2,-1,0, COLOR_SILVER);
-    background   = Bg(0,0,0,COLOR_BLUE);
+    player       = Ball(-2,10,0, COLOR_SILVER);
+    background   = Bg(0,10,0,COLOR_BLUE);
     // Create and compile our GLSL program from the shaders
     programID = LoadShaders("Sample_GL.vert", "Sample_GL.frag");
     // Get a handle for our "MVP" uniform
