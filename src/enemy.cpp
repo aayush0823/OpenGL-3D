@@ -28,19 +28,6 @@ Enemy::Enemy(float x, float y,float z, color_t color, int type ) {
         this->object = create3DObject(GL_TRIANGLES, 3*50, vertex_buffer_data, color, GL_FILL);
         this->object1 = create3DObject(GL_TRIANGLES, 3*50, vertex_buffer_data, color, GL_FILL);
     }
-    // GLfloat vertex_buffer_data2[] = {
-    //     0.45f,0.03f,-0.6f,
-    //     -0.45f,0.03f,-0.6f,
-    //     0.45f,0.03f,0.6f,
-
-    //     0.45f,0.03f,0.6f,
-    //     -0.45f,0.03f,-0.6f,
-    //     -0.45f,0.03f,0.6f,
-
-    //     0.8f,0.03f,0.6f,
-    //     -0.8f,0.03f,0.6f,
-    //     0.0f,0.03f,1.0f,
-    // };
     if(type==2)//fuel
     {
         GLfloat vertex_buffer_data[] = {
@@ -85,8 +72,8 @@ Enemy::Enemy(float x, float y,float z, color_t color, int type ) {
         -0.1f, 0.1f + 0.1f, 0.1f,
         };
 
-        this->object = create3DObject(GL_TRIANGLES, 3*11, vertex_buffer_data, color, GL_FILL);
-        this->object1 = create3DObject(GL_TRIANGLES, 3*11, vertex_buffer_data, color, GL_FILL);
+        this->object = create3DObject(GL_TRIANGLES, 3*10, vertex_buffer_data, color, GL_FILL);
+        this->object1 = create3DObject(GL_TRIANGLES, 3*10, vertex_buffer_data, color, GL_FILL);
     }
     if(type==3)//volcano
     {
@@ -126,12 +113,12 @@ Enemy::Enemy(float x, float y,float z, color_t color, int type ) {
         GLfloat vertex_buffer_data[1000];
         for(int i=0;i<9*50;i+=9)
         {
-            vertex_buffer_data[i]=0.2*cos(2*pi/(float)50*(float)t);
+            vertex_buffer_data[i]=0.1*cos(2*pi/(float)50*(float)t);
             vertex_buffer_data[i+1]=0.0f;
-            vertex_buffer_data[i+2]=0.2*sin(2*pi/(float)50*(float)t);
-            vertex_buffer_data[i+3]=0.2*cos(2*pi/(float)50*(float)(t+1));
+            vertex_buffer_data[i+2]=0.1*sin(2*pi/(float)50*(float)t);
+            vertex_buffer_data[i+3]=0.1*cos(2*pi/(float)50*(float)(t+1));
             vertex_buffer_data[i+4]=0.0f;
-            vertex_buffer_data[i+5]=0.2*sin(2*pi/(float)50*(float)(t+1));
+            vertex_buffer_data[i+5]=0.1*sin(2*pi/(float)50*(float)(t+1));
             vertex_buffer_data[i+6]=0.0;
             vertex_buffer_data[i+7]=0.0;
             vertex_buffer_data[i+8]=0.0f;
@@ -139,11 +126,11 @@ Enemy::Enemy(float x, float y,float z, color_t color, int type ) {
         }
         for(int i=9*50;i<9*100;i+=9)
         {
-            vertex_buffer_data[i]=0.2*cos(2*pi/(float)50*(float)t);
-            vertex_buffer_data[i+1]=0.2*sin(2*pi/(float)50*(float)t);
+            vertex_buffer_data[i]=0.1*cos(2*pi/(float)50*(float)t);
+            vertex_buffer_data[i+1]=0.1*sin(2*pi/(float)50*(float)t);
             vertex_buffer_data[i+2]=0.0f;
-            vertex_buffer_data[i+3]=0.2*cos(2*pi/(float)50*(float)(t+1));
-            vertex_buffer_data[i+4]=0.2*sin(2*pi/(float)50*(float)(t+1));
+            vertex_buffer_data[i+3]=0.1*cos(2*pi/(float)50*(float)(t+1));
+            vertex_buffer_data[i+4]=0.1*sin(2*pi/(float)50*(float)(t+1));
             vertex_buffer_data[i+5]=0.0f;
             vertex_buffer_data[i+6]=0.0;
             vertex_buffer_data[i+7]=0.0;
@@ -203,10 +190,10 @@ void Enemy::set_position(float x, float y,float z) {
     this->position = glm::vec3(x, y, z);
 }
 
-void Enemy::boom(float rotation) { 
-    this->position.y -= speed/3;
-    this->position.x += 3*speed*sin(rotation * M_PI / 180.0f);
-    this->position.z += 3*speed*cos(rotation * M_PI / 180.0f);
+void Enemy::boom(float rotationx , float rotationy) { 
+    this->position.x += speed*sin(rotationy * M_PI / 180.0f);
+    this->position.y += -2*speed*sin(rotationx * M_PI / 180.0f);
+    this->position.z += speed*cos(rotationx * M_PI / 180.0f)*cos(rotationy * M_PI / 180.0f);
 }
 
 void Enemy::missile() { 

@@ -16,3 +16,4 @@ const color_t COLOR_MAROON = { 128, 0, 0 };
 const color_t COLOR_SKYBLUE = { 135, 206, 250 };
 const color_t COLOR_SILVER = { 192, 192, 192 };
 const color_t COLOR_YELLOW = { 255, 255, 0 };
+const color_t COLOR_WHITE = { 255, 255, 255 };

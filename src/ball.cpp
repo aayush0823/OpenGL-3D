@@ -104,10 +104,27 @@ Ball::Ball(float x, float y,float z, color_t color) {
         t++;
     }
 
+    GLfloat vertex_buffer_data4[500];
+    t=0;
+    for(int i=0;i<9*4;i+=9)
+    {
+    	vertex_buffer_data4[i]=0.04*cos(2*pi/(float)4*(float)t);
+        vertex_buffer_data4[i+1]=0.04*sin(2*pi/(float)4*(float)t);
+        vertex_buffer_data4[i+2]=2.0f;
+        vertex_buffer_data4[i+3]=0.04*cos(2*pi/(float)4*(float)(t+1));
+        vertex_buffer_data4[i+4]=0.04*sin(2*pi/(float)4*(float)(t+1));
+        vertex_buffer_data4[i+5]=2.0f;
+        vertex_buffer_data4[i+6]=0.0;
+        vertex_buffer_data4[i+7]=0.0;
+        vertex_buffer_data4[i+8]=2.0f;
+        t++;
+    }
+
     this->object = create3DObject(GL_TRIANGLES, 3*100, vertex_buffer_data, color, GL_FILL);
     this->object1 = create3DObject(GL_TRIANGLES, 3*50, vertex_buffer_data_end, COLOR_RED, GL_FILL);
     this->object2 = create3DObject(GL_TRIANGLES, 3*8, vertex_buffer_data2, COLOR_RED, GL_FILL);
-    this->object3 = create3DObject(GL_TRIANGLES, 3*50, vertex_buffer_data3, COLOR_BLACK, GL_FILL);
+    this->object3 = create3DObject(GL_TRIANGLES, 3*50, vertex_buffer_data3, COLOR_BLACK, GL_LINE);
+    this->object4 = create3DObject(GL_TRIANGLES, 3*4, vertex_buffer_data4, COLOR_WHITE, GL_LINE);
 }
 
 void Ball::draw(glm::mat4 VP) {
@@ -115,15 +132,17 @@ void Ball::draw(glm::mat4 VP) {
     glm::mat4 translate = glm::translate (this->position);    // glTranslatef
     rotatez    = glm::rotate((float) (this->rotationz * M_PI / 180.0f), glm::vec3(0, 0, 1));
     rotatey    = glm::rotate((float) (this->rotationy * M_PI / 180.0f), glm::vec3(0, 1, 0));
+    rotatex    = glm::rotate((float) (this->rotationx * M_PI / 180.0f), glm::vec3(1, 0, 0));
     // No need as coords centered at 0, 0, 0 of cube arouund which we waant to rotate
     // rotate          = rotate * glm::translate(glm::vec3(0, -0.6, 0));
-    Matrices.model *= (translate*rotatez*rotatey);
+    Matrices.model *= (translate*rotatey*rotatex*rotatez);
     glm::mat4 MVP = VP * Matrices.model;
     glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
     draw3DObject(this->object);
     draw3DObject(this->object1);
     draw3DObject(this->object2);
     draw3DObject(this->object3);
+    draw3DObject(this->object4);
 }
 
 void Ball::set_position(float x, float y,float z) {
@@ -137,13 +156,15 @@ void Ball::tick(int move) {
 		this->rotationy += 3*speed;
 	if(move == 3)
 	{
-		this->position.z += speed*cos(this->rotationy * M_PI / 180.0f);
-		this->position.x += speed*sin(this->rotationy * M_PI / 180.0f);
+		this->position.z += speed*cos(this->rotationy * M_PI / 180.0f)*cos(this->rotationx * M_PI / 180.0f);
+		this->position.x += speed*sin(this->rotationy * M_PI / 180.0f)*cos(this->rotationx * M_PI / 180.0f);
+		this->position.y -= speed*sin(this->rotationx * M_PI / 180.0f);
 	}
 	if(move == 4)
 	{
-		this->position.z -= speed*cos(this->rotationy * M_PI / 180.0f);
-		this->position.x -= speed*sin(this->rotationy * M_PI / 180.0f);
+		this->position.z -= speed*cos(this->rotationy * M_PI / 180.0f)*cos(this->rotationx * M_PI / 180.0f);
+		this->position.x -= speed*sin(this->rotationy * M_PI / 180.0f)*cos(this->rotationx * M_PI / 180.0f);
+		this->position.y += speed*sin(this->rotationx * M_PI / 180.0f);
 	}
 	if(move == 5)
 		this->position.y += speed;
@@ -156,4 +177,8 @@ void Ball::rotate(int move) {
 		this->rotationz -= 3*speed;
 	if(move == 2)
 		this->rotationz += 3*speed;
+	if(move == 3)
+		this->rotationx -= 3*speed;
+	if(move == 4)
+		this->rotationx += 3*speed;
 }

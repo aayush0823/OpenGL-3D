@@ -92,4 +92,5 @@ extern const color_t COLOR_MAROON  ;
 extern const color_t COLOR_SKYBLUE  ;
 extern const color_t COLOR_SILVER  ;
 extern const color_t COLOR_YELLOW ;
+extern const color_t COLOR_WHITE ;
 #endif

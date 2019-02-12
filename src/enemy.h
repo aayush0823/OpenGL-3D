@@ -11,7 +11,7 @@ public:
     glm::vec3 position;
     void draw(glm::mat4 VP);
     void set_position(float x, float y,float z);
-    void boom(float rotation);
+    void boom(float rotationx , float rotationy);
     void missile();
     double speed;
 private:
