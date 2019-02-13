@@ -23,8 +23,10 @@ vector<Enemy> fuel;
 vector<Enemy> volcano;
 vector<Enemy> bomb;
 vector<Enemy> missile;
+vector<Enemy> boat;
 Ball player;
 Bg background;
+
 void detect_collision();
 
 float screen_zoom = 1, screen_center_x = 0, screen_center_y = 0;
@@ -77,6 +79,8 @@ void draw() {
     	bomb[i].draw(VP);
     for(int i=0;i<missile.size();i++)
     	missile[i].draw(VP);
+    for(int i=0;i<boat.size();i++)
+    	boat[i].draw(VP);
     player.draw(VP);
     if(view==0)//top
     {
@@ -128,6 +132,9 @@ void tick_input(GLFWwindow *window) {
     {
     	missile.push_back(Enemy(player.position.x, player.position.y, player.position.z,COLOR_BLACK, 5));
     	shoot = 1;
+    	missile[missile.size()-1].rotationx = player.rotationx;
+    	missile[missile.size()-1].rotationy = player.rotationy;
+    	missile[missile.size()-1].rotationz = player.rotationz;
     }
     if(bo && shoot  == 0)
     {
@@ -207,12 +214,16 @@ void tick_elements() {
          	bomb.erase(bomb.begin()+i);
 
     for(int i=0;i<missile.size();i++)
-    	missile[i].boom(player.rotationx, player.rotationy);
+    	missile[i].boom(missile[i].rotationx, missile[i].rotationy);
     for(int i=0;i<missile.size();i++)
     	if(missile[i].position.y < 0)
          	missile.erase(missile.begin()+i);
 }
 void dead(){
+	printf(" ___   _   __  _______    ___ _   _________\n");
+        printf("/  _| /_\\ |  \\/  | __|   / _ \\ \\ / / __| _ \\\n");
+        printf("| ( |/ _ \\| |\\/| | _|    | () \\ V /| _||   /\n");
+        printf("\\___/_/ \\_\\_|  |_|___|   \\___/ \\_/ |___|_|_\\\n");
 	quit(window);
 }
 /* Initialize the OpenGL rendering properties */
@@ -232,6 +243,8 @@ void initGL(GLFWwindow *window, int width, int height) {
     	else if(rand()%6 == 1)
     	volcano.push_back(Enemy(i*10,0.1,k*10 + 3,COLOR_BLACK,3));
 	}
+	else
+    	boat.push_back(Enemy(i*10,0.3,k*10 + 3,COLOR_BLACK,6));
     // Create and compile our GLSL program from the shaders
     programID = LoadShaders("Sample_GL.vert", "Sample_GL.frag");
     // Get a handle for our "MVP" uniform
@@ -305,6 +318,37 @@ void detect_collision() {
     }
     if(player.position.y < 0 || fuel_level < 0)
     	dead();
+    for(int i=0;i<boat.size();i++)
+    	for(int j=0;j<missile.size();j++)
+    if(abs(boat[i].position.x-missile[j].position.x)<=0.4 && abs(boat[i].position.y-missile[j].position.y)<=0.4 && abs(boat[i].position.z-missile[j].position.z-0.3)<=0.8)
+    {
+    	boat.erase(boat.begin()+i);
+    	missile.erase(missile.begin()+j);
+    }
+
+    for(int i=0;i<land.size();i++)
+    	for(int j=0;j<missile.size();j++)
+    	if(abs(land[i].position.x-missile[j].position.x)<=1.2 && abs(land[i].position.y-missile[j].position.y)<=0.15 && abs(land[i].position.z-missile[j].position.z)<=1.2)
+    	{
+	    	missile.erase(missile.begin()+j);
+	    	land[i]=Enemy(land[i].position.x,land[i].position.y,land[i].position.z,COLOR_RED,1);
+    	}
+
+    for(int i=0;i<boat.size();i++)
+    	for(int j=0;j<bomb.size();j++)
+    if(abs(boat[i].position.x-bomb[j].position.x)<=0.4 && abs(boat[i].position.y-bomb[j].position.y)<=0.4 && abs(boat[i].position.z-bomb[j].position.z-0.3)<=0.8)
+    {
+    	boat.erase(boat.begin()+i);
+    	bomb.erase(bomb.begin()+j);
+    }
+
+    for(int i=0;i<land.size();i++)
+    	for(int j=0;j<bomb.size();j++)
+    	if(abs(land[i].position.x-bomb[j].position.x)<=1.2 && abs(land[i].position.y-bomb[j].position.y)<=0.15 && abs(land[i].position.z-bomb[j].position.z)<=1.2)
+    	{
+	    	bomb.erase(bomb.begin()+j);
+	    	land[i]=Enemy(land[i].position.x,land[i].position.y,land[i].position.z,COLOR_RED,1);
+    	}
 }
 
 void reset_screen() {

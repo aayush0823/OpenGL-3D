@@ -14,9 +14,14 @@ public:
     void boom(float rotationx , float rotationy);
     void missile();
     double speed;
+    float rotationx;
+    float rotationy;
+    float rotationz;
 private:
     VAO *object;
     VAO *object1;
+    VAO *object2;
+    VAO *object3;
 };
 
 #endif // BALL_H

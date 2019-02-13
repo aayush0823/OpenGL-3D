@@ -27,6 +27,8 @@ Enemy::Enemy(float x, float y,float z, color_t color, int type ) {
         }
         this->object = create3DObject(GL_TRIANGLES, 3*50, vertex_buffer_data, color, GL_FILL);
         this->object1 = create3DObject(GL_TRIANGLES, 3*50, vertex_buffer_data, color, GL_FILL);
+        this->object2 = create3DObject(GL_TRIANGLES, 3*50, vertex_buffer_data, color, GL_FILL);
+        this->object3 = create3DObject(GL_TRIANGLES, 3*50, vertex_buffer_data, color, GL_FILL);
     }
     if(type==2)//fuel
     {
@@ -74,6 +76,8 @@ Enemy::Enemy(float x, float y,float z, color_t color, int type ) {
 
         this->object = create3DObject(GL_TRIANGLES, 3*10, vertex_buffer_data, color, GL_FILL);
         this->object1 = create3DObject(GL_TRIANGLES, 3*10, vertex_buffer_data, color, GL_FILL);
+        this->object2 = create3DObject(GL_TRIANGLES, 3*10, vertex_buffer_data, color, GL_FILL);
+        this->object3 = create3DObject(GL_TRIANGLES, 3*10, vertex_buffer_data, color, GL_FILL);
     }
     if(type==3)//volcano
     {
@@ -107,6 +111,8 @@ Enemy::Enemy(float x, float y,float z, color_t color, int type ) {
         }
         this->object = create3DObject(GL_TRIANGLES, 3*50, vertex_buffer_data, color, GL_FILL);
         this->object1 = create3DObject(GL_TRIANGLES, 3*50, vertex_buffer_data2, COLOR_ORANGE, GL_FILL);
+        this->object2 = create3DObject(GL_TRIANGLES, 3*50, vertex_buffer_data2, COLOR_ORANGE, GL_FILL);
+        this->object3 = create3DObject(GL_TRIANGLES, 3*50, vertex_buffer_data2, COLOR_ORANGE, GL_FILL);
     }
     if(type==4)//bomb
     {
@@ -139,6 +145,8 @@ Enemy::Enemy(float x, float y,float z, color_t color, int type ) {
         }
         this->object = create3DObject(GL_TRIANGLES, 3*100, vertex_buffer_data, color, GL_FILL);
         this->object1 = create3DObject(GL_TRIANGLES, 3*100, vertex_buffer_data, color, GL_FILL);
+        this->object2 = create3DObject(GL_TRIANGLES, 3*100, vertex_buffer_data, color, GL_FILL);
+        this->object3 = create3DObject(GL_TRIANGLES, 3*100, vertex_buffer_data, color, GL_FILL);
     }
     if(type == 5)//missile
     {
@@ -155,14 +163,14 @@ Enemy::Enemy(float x, float y,float z, color_t color, int type ) {
         	vertex_buffer_data[i+5]=0.0f;
         	vertex_buffer_data[i+6]=0.05*cos(2*pi/(float)50*(float)t);
         	vertex_buffer_data[i+7]=0.05*sin(2*pi/(float)50*(float)t);
-        	vertex_buffer_data[i+8]=0.3f;
+        	vertex_buffer_data[i+8]=0.2f;
 
         	vertex_buffer_data2[i]=0.05*cos(2*pi/(float)50*(float)t);
         	vertex_buffer_data2[i+1]=0.05*sin(2*pi/(float)50*(float)t);
-        	vertex_buffer_data2[i+2]=0.3f;
+        	vertex_buffer_data2[i+2]=0.2f;
         	vertex_buffer_data2[i+3]=0.05*cos(2*pi/(float)50*(float)(t+1));
         	vertex_buffer_data2[i+4]=0.05*sin(2*pi/(float)50*(float)(t+1));
-        	vertex_buffer_data2[i+5]=0.3f;
+        	vertex_buffer_data2[i+5]=0.2f;
         	vertex_buffer_data2[i+6]=0.05*cos(2*pi/(float)50*(float)(t+1));
         	vertex_buffer_data2[i+7]=0.05*sin(2*pi/(float)50*(float)(t+1));
         	vertex_buffer_data2[i+8]=0.0f;
@@ -170,8 +178,89 @@ Enemy::Enemy(float x, float y,float z, color_t color, int type ) {
     	}
     	this->object = create3DObject(GL_TRIANGLES, 3*50, vertex_buffer_data, COLOR_BLACK, GL_FILL);
         this->object1 = create3DObject(GL_TRIANGLES, 3*50, vertex_buffer_data2, COLOR_ORANGE, GL_FILL);
+        this->object2 = create3DObject(GL_TRIANGLES, 3*50, vertex_buffer_data2, COLOR_ORANGE, GL_FILL);
+        this->object3 = create3DObject(GL_TRIANGLES, 3*50, vertex_buffer_data2, COLOR_ORANGE, GL_FILL);
     }
+    if(type == 6)//boat
+    {
 
+    GLfloat base_vertex_buffer_data[] = {
+        -.101f, -.101f, -0.201f,
+        0.101f, -0.101f, -0.201f,
+        -0.101f, -0.101f, 0.201f,
+
+        -0.101f, -0.101f,0.201f,
+        0.101f, -0.101f, 0.201f,
+        0.101f, -0.101f, -0.201f
+    };
+    GLfloat side_vertex_buffer_data[] = {
+        -0.101f, -0.101f, -0.201f,
+        -0.101f, -0.101f, 0.201f,
+        -0.201f, 0.101f, 0.301f,
+
+        -0.101f, -0.101f, -0.201f,
+        -0.201f, 0.101f, 0.301f,
+        -0.201f, 0.101f, -0.301f,
+
+        0.101f, -0.101f, -0.201f,
+        0.101f, -0.101f, 0.201f,
+        0.201f,  0.101f, 0.301f,
+
+        0.101f, -0.101f, -0.201f,
+        0.201f, 0.101f, 0.301f,
+        0.201f, 0.101f, -0.301f,
+
+    };
+    GLfloat face_vertex_buffer_data[] = {
+        -0.201f,   0.101f,-0.301f,
+        -0.101f, -0.101f, -0.201f,
+        0.001f, 0.201f,-0.401f,
+
+        0.201f, 0.101f,-0.301f,
+        0.101f,  -0.101f,-0.201f,
+        0.001f, 0.201f,-0.401f,
+
+        0.001f, 0.201f,-0.401f,
+        -0.101f, -0.101f,-0.201f,
+        0.101f, -0.101f,-0.201f,
+
+        -0.201f, 0.101f, 0.301f,
+        -0.101f,-0.101f, 0.201f,
+        0.001f, 0.201f, 0.401f,
+
+        0.201f, 0.101f,0.301f,
+        0.101f,  -0.101f,0.201f,
+        0.001f,  0.201f,0.401f,
+
+        0.001f, 0.201f,0.401f,
+        -0.101f,-0.101f, 0.201f,
+        0.101f,-0.101f, 0.201f,
+
+    };
+
+    GLfloat pole_vertex_buffer_data[] = {
+    	0.03f,0.0f,0.0f,
+    	-0.03f,0.0f,0.0f,
+    	0.03f,1.0f,0.0f,
+
+    	-0.03f,0.0f,0.0f,
+    	-0.03f,1.0f,0.0f,
+    	0.03f,1.0f,0.0f,
+
+    	0.0f,0.0f,0.03f,
+    	0.0f,0.0f,-0.03f,
+    	0.0f,1.0f,0.03f,
+
+    	0.0f,0.0f,-0.03f,
+    	0.0f,1.0f,-0.03f,
+    	0.0f,1.0f,0.03f,
+
+    };
+    this->object = create3DObject(GL_TRIANGLES, 2 * 3, base_vertex_buffer_data, COLOR_BROWN);
+    this->object1 = create3DObject(GL_TRIANGLES, 4 * 3, side_vertex_buffer_data,COLOR_RED);
+    this->object2 = create3DObject(GL_TRIANGLES, 6 * 3, face_vertex_buffer_data,COLOR_ORANGE);
+    this->object3 = create3DObject(GL_TRIANGLES, 4 * 3, pole_vertex_buffer_data,COLOR_WHITE);
+    }
 }
 
 void Enemy::draw(glm::mat4 VP) {
@@ -184,6 +273,8 @@ void Enemy::draw(glm::mat4 VP) {
     glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
     draw3DObject(this->object);
     draw3DObject(this->object1);
+    draw3DObject(this->object2);
+    draw3DObject(this->object3);
 }
 
 void Enemy::set_position(float x, float y,float z) {
