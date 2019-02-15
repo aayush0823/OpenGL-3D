@@ -7,6 +7,7 @@ const color_t COLOR_BLUE = { 0, 0, 255};
 const color_t COLOR_PINK = { 255, 192, 203};
 const color_t COLOR_BACKGROUND = { 242, 241, 239 };
 const color_t COLOR_GOLD = { 255, 215, 0 };
+const color_t COLOR_GREY = { 169, 169, 169 };
 const color_t COLOR_ORANGE = { 255, 69, 0 };
 const color_t COLOR_LIGHTBLUE = { 30, 144, 255 };
 const color_t COLOR_SKIN = { 255, 224, 189 };

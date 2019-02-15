@@ -2,6 +2,12 @@
 #include "main.h"
 #include <math.h>
 
+float mod(float a)
+{
+	if(a>0)return a;
+	return -a;
+}
+
 Enemy::Enemy(float x, float y,float z, color_t color, int type ) {
     this->position = glm::vec3(x, y, z);
     this->speed = 0.3;
@@ -116,37 +122,41 @@ Enemy::Enemy(float x, float y,float z, color_t color, int type ) {
     }
     if(type==4)//bomb
     {
+    	this->inibombx = this->position.x;
+    	this->inibomby = this->position.y;
+    	this->inibombz = this->position.z;
+
         GLfloat vertex_buffer_data[1000];
-        for(int i=0;i<9*50;i+=9)
+        for(int i=0;i<9*10;i+=9)
         {
-            vertex_buffer_data[i]=0.1*cos(2*pi/(float)50*(float)t);
+            vertex_buffer_data[i]=0.05*cos(2*pi/(float)10*(float)t);
             vertex_buffer_data[i+1]=0.0f;
-            vertex_buffer_data[i+2]=0.1*sin(2*pi/(float)50*(float)t);
-            vertex_buffer_data[i+3]=0.1*cos(2*pi/(float)50*(float)(t+1));
+            vertex_buffer_data[i+2]=0.05*sin(2*pi/(float)10*(float)t);
+            vertex_buffer_data[i+3]=0.05*cos(2*pi/(float)10*(float)(t+1));
             vertex_buffer_data[i+4]=0.0f;
-            vertex_buffer_data[i+5]=0.1*sin(2*pi/(float)50*(float)(t+1));
+            vertex_buffer_data[i+5]=0.05*sin(2*pi/(float)10*(float)(t+1));
             vertex_buffer_data[i+6]=0.0;
             vertex_buffer_data[i+7]=0.0;
             vertex_buffer_data[i+8]=0.0f;
             t++;
         }
-        for(int i=9*50;i<9*100;i+=9)
+        for(int i=9*10;i<9*20;i+=9)
         {
-            vertex_buffer_data[i]=0.1*cos(2*pi/(float)50*(float)t);
-            vertex_buffer_data[i+1]=0.1*sin(2*pi/(float)50*(float)t);
+            vertex_buffer_data[i]=0.05*cos(2*pi/(float)10*(float)t);
+            vertex_buffer_data[i+1]=0.05*sin(2*pi/(float)10*(float)t);
             vertex_buffer_data[i+2]=0.0f;
-            vertex_buffer_data[i+3]=0.1*cos(2*pi/(float)50*(float)(t+1));
-            vertex_buffer_data[i+4]=0.1*sin(2*pi/(float)50*(float)(t+1));
+            vertex_buffer_data[i+3]=0.05*cos(2*pi/(float)10*(float)(t+1));
+            vertex_buffer_data[i+4]=0.05*sin(2*pi/(float)10*(float)(t+1));
             vertex_buffer_data[i+5]=0.0f;
             vertex_buffer_data[i+6]=0.0;
             vertex_buffer_data[i+7]=0.0;
             vertex_buffer_data[i+8]=0.0f;
             t++;
         }
-        this->object = create3DObject(GL_TRIANGLES, 3*100, vertex_buffer_data, color, GL_FILL);
-        this->object1 = create3DObject(GL_TRIANGLES, 3*100, vertex_buffer_data, color, GL_FILL);
-        this->object2 = create3DObject(GL_TRIANGLES, 3*100, vertex_buffer_data, color, GL_FILL);
-        this->object3 = create3DObject(GL_TRIANGLES, 3*100, vertex_buffer_data, color, GL_FILL);
+        this->object = create3DObject(GL_TRIANGLES, 3*20, vertex_buffer_data, color, GL_FILL);
+        this->object1 = create3DObject(GL_TRIANGLES, 3*1, vertex_buffer_data, color, GL_FILL);
+        this->object2 = create3DObject(GL_TRIANGLES, 3*1, vertex_buffer_data, color, GL_FILL);
+        this->object3 = create3DObject(GL_TRIANGLES, 3*1, vertex_buffer_data, color, GL_FILL);
     }
     if(type == 5)//missile
     {
@@ -261,6 +271,163 @@ Enemy::Enemy(float x, float y,float z, color_t color, int type ) {
     this->object2 = create3DObject(GL_TRIANGLES, 6 * 3, face_vertex_buffer_data,COLOR_ORANGE);
     this->object3 = create3DObject(GL_TRIANGLES, 4 * 3, pole_vertex_buffer_data,COLOR_WHITE);
     }
+
+    if(type==7)//cannon
+    {
+        GLfloat vertex_buffer_data[] = {
+        -0.2f,-0.2f , 0.2f,
+        -0.2f, 0.2f , 0.2f,
+         0.2f,-0.2f , 0.2f,
+
+         0.2f,0.2f,0.2f,
+        -0.2f, 0.2f,0.2f,
+         0.2f,-0.2f,0.2f,
+
+         -0.2f,-0.2f ,-0.2f,
+        -0.2f, 0.2f ,-0.2f,
+         0.2f,-0.2f ,-0.2f,
+
+         0.2f,0.2f,-0.2f,
+        -0.2f, 0.2f,-0.2f,
+         0.2f,-0.2f,-0.2f,
+
+         0.2f,-0.2f ,-0.2f,
+         0.2f, 0.2f ,-0.2f,
+         0.2f,-0.2f , 0.2f,
+
+         0.2f,0.2f,0.2f,
+         0.2f,0.2f,-0.2f,
+         0.2f,-0.2f,0.2f,
+        
+        -0.2f,0.2f ,-0.2f,
+        -0.2f,-0.2f,-0.2f,
+        -0.2f,-0.2f, 0.2f,
+        
+        -0.2f, 0.2f, 0.2f,
+        -0.2f,-0.2f, 0.2f,
+        -0.2f, 0.2f,-0.2f,
+        
+         0.2f,-0.2f,-0.2f,
+        -0.2f,-0.2f, 0.2f,
+        -0.2f,-0.2f,-0.2f,
+        
+        -0.2f,-0.2f , 0.2f,
+         0.2f,-0.2f ,-0.2f,
+         0.2f,-0.2f , 0.2f,
+        
+        -0.2f, 0.2f, 0.2f,
+        -0.2f,0.2f,-0.2f,
+        0.2f, 0.2f,-0.2f,
+        
+        0.2f,0.2f ,-0.2f,
+        -0.2f,0.2f , 0.2f,
+        0.2f,0.2f , 0.2f,
+        };
+
+        this->object = create3DObject(GL_TRIANGLES, 3*12, vertex_buffer_data, color, GL_FILL);
+        this->object1 = create3DObject(GL_TRIANGLES, 3*12, vertex_buffer_data, color, GL_FILL);
+        this->object2 = create3DObject(GL_TRIANGLES, 3*12, vertex_buffer_data, color, GL_FILL);
+        this->object3 = create3DObject(GL_TRIANGLES, 3*12, vertex_buffer_data, color, GL_FILL);
+    }
+    if(type==8)//arrow
+    {
+        GLfloat vertex_buffer_data[] = {
+        -0.2f,0.3f ,-0.2f,
+        -0.2f,0.3f , 0.2f,
+        -0.2f,1.0f ,-0.2f,
+
+        -0.2f,1.0f , 0.2f,
+        -0.2f,0.3f , 0.2f,
+        -0.2f,1.0f ,-0.2f,
+
+         0.2f,0.3f ,-0.2f,
+         0.2f,0.3f , 0.2f,
+         0.2f,1.0f ,-0.2f,
+
+         0.2f,1.0f , 0.2f,
+         0.2f,0.3f , 0.2f,
+         0.2f,1.0f ,-0.2f,
+
+        -0.2f,0.3f ,-0.2f,
+         0.2f,0.3f ,-0.2f,
+        -0.2f,1.0f ,-0.2f,
+
+         0.2f,1.0f ,-0.2f,
+         0.2f,0.3f ,-0.2f,
+        -0.2f,1.0f ,-0.2f,
+
+        -0.2f,0.3f , 0.2f,
+         0.2f,0.3f , 0.2f,
+        -0.2f,1.0f , 0.2f,
+
+         0.2f,1.0f , 0.2f,
+         0.2f,0.3f , 0.2f,
+        -0.2f,1.0f , 0.2f,
+
+        -0.2f,0.3f ,-0.2f,
+         0.2f,0.3f ,-0.2f,
+        -0.2f,0.3f , 0.2f,
+
+         0.2f,0.3f ,-0.2f,
+         0.2f,0.3f ,0.2f,
+        -0.2f,0.3f ,0.2f,
+
+        -0.2f,1.0f ,-0.2f,
+         0.2f,1.0f ,-0.2f,
+        -0.2f,1.0f , 0.2f,
+
+         0.2f,1.0f ,-0.2f,
+         0.2f,1.0f ,0.2f,
+        -0.2f,1.0f ,0.2f,
+
+        -0.3f,0.3f ,0.2f,
+         0.3f,0.3f ,0.2f,
+         0.0f,0.0f ,0.2f,
+
+        -0.3f,0.3f ,-0.2f,
+         0.3f,0.3f ,-0.2f,
+         0.0f,0.0f ,-0.2f,
+
+		};
+
+        this->object = create3DObject(GL_TRIANGLES, 3*14, vertex_buffer_data, color, GL_FILL);
+        this->object1 = create3DObject(GL_TRIANGLES, 3*10, vertex_buffer_data, color, GL_FILL);
+        this->object2 = create3DObject(GL_TRIANGLES, 3*10, vertex_buffer_data, color, GL_FILL);
+        this->object3 = create3DObject(GL_TRIANGLES, 3*10, vertex_buffer_data, color, GL_FILL);
+    }
+    if(type == 9)
+    {
+    	GLfloat vertex_buffer_data[450];
+    	GLfloat vertex_buffer_data2[450];
+    	int t=0;
+    	for(int i=0;i<9*50;i+=9)
+    	{
+    		vertex_buffer_data[i]=0.18*cos(2*pi/(float)50*(float)t);
+        	vertex_buffer_data[i+1]=0.18*sin(2*pi/(float)50*(float)t);
+        	vertex_buffer_data[i+2]=0.0f;
+       		vertex_buffer_data[i+3]=0.18*cos(2*pi/(float)50*(float)(t+1));
+        	vertex_buffer_data[i+4]=0.18*sin(2*pi/(float)50*(float)(t+1));
+        	vertex_buffer_data[i+5]=0.0f;
+        	vertex_buffer_data[i+6]=0.15*cos(2*pi/(float)50*(float)t);
+        	vertex_buffer_data[i+7]=0.15*sin(2*pi/(float)50*(float)t);
+        	vertex_buffer_data[i+8]=0.0f;
+
+        	vertex_buffer_data2[i]=0.15*cos(2*pi/(float)50*(float)t);
+        	vertex_buffer_data2[i+1]=0.15*sin(2*pi/(float)50*(float)t);
+        	vertex_buffer_data2[i+2]=0.0f;
+       		vertex_buffer_data2[i+3]=0.15*cos(2*pi/(float)50*(float)(t+1));
+        	vertex_buffer_data2[i+4]=0.15*sin(2*pi/(float)50*(float)(t+1));
+        	vertex_buffer_data2[i+5]=0.0f;
+        	vertex_buffer_data2[i+6]=0.18*cos(2*pi/(float)50*(float)(t+1));
+        	vertex_buffer_data2[i+7]=0.18*sin(2*pi/(float)50*(float)(t+1));
+        	vertex_buffer_data2[i+8]=0.0f;
+        	t++;
+    	}
+    	this->object  = create3DObject(GL_TRIANGLES, 3*50, vertex_buffer_data, COLOR_GREY, GL_FILL);
+        this->object1 = create3DObject(GL_TRIANGLES, 3*50, vertex_buffer_data2, COLOR_GREY, GL_FILL);
+        this->object2 = create3DObject(GL_TRIANGLES, 3*50, vertex_buffer_data2, COLOR_GREY, GL_FILL);
+        this->object3 = create3DObject(GL_TRIANGLES, 3*50, vertex_buffer_data2, COLOR_GREY, GL_FILL);
+    }
 }
 
 void Enemy::draw(glm::mat4 VP) {
@@ -289,4 +456,21 @@ void Enemy::boom(float rotationx , float rotationy) {
 
 void Enemy::missile() { 
     this->position.y -= speed/3;
+}
+
+void Enemy::enemybomb(){
+	if(this->inibombx-this->playerx > 0)
+		this->position.x -= speed*(mod(this->inibombx-this->playerx)/(mod(this->inibombx-this->playerx)+mod(this->inibomby-this->playery)+mod(this->inibombz-this->playerz)));
+	else
+		this->position.x += speed*(mod(this->inibombx-this->playerx)/(mod(this->inibombx-this->playerx)+mod(this->inibomby-this->playery)+mod(this->inibombz-this->playerz)));
+
+	if(this->inibomby-this->playery > 0)
+		this->position.y -= speed*(mod(this->inibomby-this->playery)/(mod(this->inibombx-this->playerx)+mod(this->inibomby-this->playery)+mod(this->inibombz-this->playerz)));
+	else
+		this->position.y += speed*(mod(this->inibomby-this->playery)/(mod(this->inibombx-this->playerx)+mod(this->inibomby-this->playery)+mod(this->inibombz-this->playerz)));
+	
+	if(this->inibombz-this->playerz > 0)
+		this->position.z -= speed*(mod(this->inibombz-this->playerz)/(mod(this->inibombx-this->playerx)+mod(this->inibomby-this->playery)+mod(this->inibombz-this->playerz)));
+	else
+		this->position.z += speed*(mod(this->inibombz-this->playerz)/(mod(this->inibombx-this->playerx)+mod(this->inibomby-this->playery)+mod(this->inibombz-this->playerz)));
 }

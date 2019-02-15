@@ -53,6 +53,7 @@ typedef struct VAO VAO;
 
 struct GLMatrices {
     glm::mat4 projection;
+    glm::mat4 projection2;
     glm::mat4 model;
     glm::mat4 view;
     GLuint    MatrixID;
@@ -71,10 +72,9 @@ struct bounding_box_t {
     float height;
 };
 
-
 extern float screen_zoom, screen_center_x, screen_center_y;
 void reset_screen();
-
+float mod(float a);
 // ---- Colors ----
 extern const color_t COLOR_RED;
 extern const color_t COLOR_GREEN;
@@ -93,4 +93,5 @@ extern const color_t COLOR_SKYBLUE  ;
 extern const color_t COLOR_SILVER  ;
 extern const color_t COLOR_YELLOW ;
 extern const color_t COLOR_WHITE ;
+extern const color_t COLOR_GREY ;
 #endif

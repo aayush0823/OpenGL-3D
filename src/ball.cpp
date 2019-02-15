@@ -8,7 +8,7 @@ Ball::Ball(float x, float y,float z, color_t color) {
     this->rotationx = 0;
     this->rotationy = 0;
     this->rotationz = 0;
-    this->speed = 0.1;
+    this->speed = 0.2;
     // Our vertices. Three consecutive floats give a 3D vertex; Three consecutive vertices give a triangle.
     // A cube has 6 faces with 2 triangles each, so this makes 6*2=12 triangles, and 12*3 vertices
     double pi = 3.14159265359;
@@ -106,17 +106,14 @@ Ball::Ball(float x, float y,float z, color_t color) {
 
     GLfloat vertex_buffer_data4[500];
     t=0;
-    for(int i=0;i<9*4;i+=9)
+    for(int i=0;i<6*4;i+=6)
     {
-    	vertex_buffer_data4[i]=0.04*cos(2*pi/(float)4*(float)t);
-        vertex_buffer_data4[i+1]=0.04*sin(2*pi/(float)4*(float)t);
+    	vertex_buffer_data4[i]=0.02*cos(2*pi/(float)4*(float)t);
+        vertex_buffer_data4[i+1]=0.02*sin(2*pi/(float)4*(float)t);
         vertex_buffer_data4[i+2]=2.0f;
-        vertex_buffer_data4[i+3]=0.04*cos(2*pi/(float)4*(float)(t+1));
-        vertex_buffer_data4[i+4]=0.04*sin(2*pi/(float)4*(float)(t+1));
+        vertex_buffer_data4[i+3]=0.0;
+        vertex_buffer_data4[i+4]=0.0;
         vertex_buffer_data4[i+5]=2.0f;
-        vertex_buffer_data4[i+6]=0.0;
-        vertex_buffer_data4[i+7]=0.0;
-        vertex_buffer_data4[i+8]=2.0f;
         t++;
     }
 
@@ -124,7 +121,7 @@ Ball::Ball(float x, float y,float z, color_t color) {
     this->object1 = create3DObject(GL_TRIANGLES, 3*50, vertex_buffer_data_end, COLOR_RED, GL_FILL);
     this->object2 = create3DObject(GL_TRIANGLES, 3*8, vertex_buffer_data2, COLOR_RED, GL_FILL);
     this->object3 = create3DObject(GL_TRIANGLES, 3*50, vertex_buffer_data3, COLOR_BLACK, GL_LINE);
-    this->object4 = create3DObject(GL_TRIANGLES, 3*4, vertex_buffer_data4, COLOR_WHITE, GL_LINE);
+    this->object4 = create3DObject(GL_LINES, 2*4, vertex_buffer_data4, COLOR_WHITE, GL_LINE);
 }
 
 void Ball::draw(glm::mat4 VP) {

@@ -13,10 +13,23 @@ public:
     void set_position(float x, float y,float z);
     void boom(float rotationx , float rotationy);
     void missile();
+    void enemybomb();
     double speed;
+
+    int time;
+    
     float rotationx;
     float rotationy;
     float rotationz;
+
+    float playerx;
+    float playery;
+    float playerz;
+
+    float inibombx;
+    float inibomby;
+    float inibombz;
+
 private:
     VAO *object;
     VAO *object1;
