@@ -22,12 +22,12 @@ int enemy_shoot = 0;
 double fuel_level = 5.0;
 int score =0;
 int damage = 50;
-double pxpos, pypos;
-double cam_heli_x,cam_heli_y;
+double prevx, prevy;
+double cam_x,cam_y;
 Dashboard board[3];
 Dashboard speedometer;
 Dashboard compass;
-Dashboard pointers[50];
+vector<Dashboard> pointers;
 vector<Enemy> land;
 vector<Enemy> fuel;
 vector<Enemy> cannon;
@@ -71,16 +71,15 @@ void draw() {
     compass.draw(VP2,-3,3,0,player.speed,COLOR_YELLOW,2);
     pointers[0].draw(VP2,-3,3,0,player.rotationy,COLOR_ORANGE,3);
     pointers[1].draw(VP2,(cannon[0].position.x - player.position.x)/100-3,(cannon[0].position.z - player.position.z)/100 +3,0,player.speed,COLOR_BLACK,4);
-    int total=2;
-    for(int i=0;i<volcano.size() && total<50;i++)
+    for(int i=0;i<volcano.size();i++)
     {
     	if((mod((volcano[i].position.x - player.position.x)/100)*mod((volcano[i].position.x - player.position.x)/100) + mod((volcano[i].position.z - player.position.z)/100)*mod((volcano[i].position.z - player.position.z)/100)) < 1)
-    		pointers[total++].draw(VP2,(volcano[i].position.x - player.position.x)/100-3,(volcano[i].position.z - player.position.z)/100 + 3,0,player.speed,COLOR_RED,4);
+    		pointers[i+2].draw(VP2,(volcano[i].position.x - player.position.x)/100-3,(volcano[i].position.z - player.position.z)/100 + 3,0,player.speed,COLOR_RED,4);
     }
-    for(int i=0;i<fuel.size() && total<50;i++)
+    for(int i=0;i<fuel.size();i++)
     {
     	if((mod((fuel[i].position.x - player.position.x)/100)*mod((fuel[i].position.x - player.position.x)/100) + mod((fuel[i].position.z - player.position.z)/100)*mod((fuel[i].position.z - player.position.z)/100)) < 1)
-    		pointers[total++].draw(VP2,(fuel[i].position.x - player.position.x)/100-3,(fuel[i].position.z - player.position.z)/100 + 3,0,player.speed,COLOR_GREEN,4);
+    		pointers[i+2+volcano.size()].draw(VP2,(fuel[i].position.x - player.position.x)/100-3,(fuel[i].position.z - player.position.z)/100 + 3,0,player.speed,COLOR_GREEN,4);
     }
     if(view==0)//top
     {
@@ -110,19 +109,16 @@ void draw() {
 	{
 		double xpos, ypos;
         glfwGetCursorPos(window, &xpos, &ypos);
-    
 
-        cam_heli_x += + (xpos - pxpos) * 90 / width;
-        cam_heli_y -= + (ypos - pypos) * 90 / height;
-        pxpos = xpos;
-        pypos = ypos;
+        cam_y -= + (ypos - prevy) * 90 / height;
+        cam_x += + (xpos - prevx) * 90 / width;
+        prevy = ypos;
+        prevx = xpos;
         target = glm::vec3(player.position.x, player.position.y, player.position.z);
 
-        float eye_x = player.position.x + (20-10*screen_zoom)*cos(cam_heli_x*M_PI/180.0f)*sin(cam_heli_y*M_PI/180.0f);
-        float eye_y = player.position.y + (20-10*screen_zoom)*cos(cam_heli_y*M_PI/180.0f);
-        float eye_z = player.position.z + (20-10*screen_zoom)*sin(cam_heli_x*M_PI/180.0f)*sin(cam_heli_y*M_PI/180.0f);
-        if(eye_y<0.3)eye_y=0.3;
-        eye = glm::vec3(eye_x,eye_y,eye_z);
+        float eye_y = player.position.y + (20-10*screen_zoom)*cos(cam_y*M_PI/180.0f);
+        if(eye_y<0.1)eye_y=0.1;
+        eye = glm::vec3(player.position.x + (20-10*screen_zoom)*cos(cam_x*M_PI/180.0f)*sin(cam_y*M_PI/180.0f),eye_y,player.position.z + (20-10*screen_zoom)*sin(cam_x*M_PI/180.0f)*sin(cam_y*M_PI/180.0f));
         up = glm::vec3(0,1,0);
 	}
     Matrices.view = glm::lookAt( eye, target, up ); // Rotating Camera for 3D
@@ -287,7 +283,7 @@ void dead(){
     printf("| ( |/ _ \\| |\\/| | _|    | () \\ V /| _||   /\n");
     printf("\\___/_/ \\_\\_|  |_|___|   \\___/ \\_/ |___|_|_\\\n");
     printf("BETTER LUCK NEXT TIME\n");
-    printf("YOUR FINAL SCORE = %d\n YOU REQUIRED TO CLEAR %d CHECK-POINTS\n",score,5-check);
+    printf("YOUR FINAL SCORE = %d\n YOU REQUIRED TO CLEAR %d MORE CHECK-POINTS\n",score,5-check);
 	quit(window);
 }
 
@@ -315,19 +311,32 @@ void initGL(GLFWwindow *window, int width, int height) {
     		if(rand()%30 == 0)
 			    parachute.push_back(Enemy(i*10,4.3,k*10 + 3, COLOR_BROWN,10));
 		}
+
 	for(int i=1;i<cannon.size();i++)
 	{
-		if((mod(player.position.x - cannon[i].position.x) + mod(player.position.z - cannon[i].position.z)) < (mod(player.position.x - cannon[0].position.x) + mod(player.position.y - cannon[0].position.y)))
+		if((abs(player.position.x - cannon[i].position.x) + abs(player.position.z - cannon[i].position.z)) < (abs(player.position.x - cannon[0].position.x) + abs(player.position.z - cannon[0].position.z)))
 		{
-			Enemy a;
+			Enemy a,b;
 			a=cannon[i];
 			cannon[i]=cannon[0];
 			cannon[0]=a;
-			a=flag[i];
-			flag[i]=flag[0];
-			flag[0]=a;
+			b=arrow[i];
+			arrow[i]=arrow[0];
+			arrow[0]=b;
 		}			
 	}
+	board[0] = Dashboard(-3.7,-2.5,0,COLOR_BROWN,0);
+    board[1] = Dashboard(-3.7,-2.8,0,COLOR_RED,0);
+    board[2] = Dashboard(-3.7,-3.1,0,COLOR_YELLOW,0);
+    speedometer = Dashboard(3,3,0,COLOR_YELLOW,1);
+    compass = Dashboard(-3,3,0,COLOR_YELLOW,2);
+    pointers.push_back(Dashboard(-3,3,0,COLOR_ORANGE,3));
+    pointers.push_back(Dashboard((cannon[0].position.x - player.position.x)/100-3,(cannon[0].position.z - player.position.z)/100 +3,0,COLOR_BLACK,4));
+    for(int i=0;i<volcano.size();i++)
+    	pointers.push_back(Dashboard((volcano[i].position.x - player.position.x)/100-3,(volcano[i].position.z - player.position.z)/100 + 3,0,COLOR_RED,4));
+    for(int i=0;i<fuel.size();i++)
+    	pointers.push_back(Dashboard((fuel[i].position.x - player.position.x)/100-3,(fuel[i].position.z - player.position.z)/100 + 3,0,COLOR_GREEN,4));
+ 
     programID = LoadShaders("Sample_GL.vert", "Sample_GL.frag");
     Matrices.MatrixID = glGetUniformLocation(programID, "MVP");
     reshapeWindow (window, width, height);
@@ -408,24 +417,23 @@ void detect_collision() {
     		}
 
     //cannon-missile
-    for(int i=0;i<cannon.size();i++)
     	for(int j=0;j<missile.size();j++)
-		    if( mod(cannon[i].position.x-missile[j].position.x) <= 0.4 && mod(cannon[i].position.y-missile[j].position.y)<=0.4 && mod(cannon[i].position.z-missile[j].position.z)<=0.7)
+		    if( mod(cannon[0].position.x-missile[j].position.x) <= 0.4 && mod(cannon[0].position.y-missile[j].position.y)<=0.4 && mod(cannon[0].position.z-missile[j].position.z- 0.3)<=0.7)
 		    {
-		    	cannon.erase(cannon.begin()+i);
-		    	arrow.erase(arrow.begin()+i);
+		    	cannon.erase(cannon.begin());
+		    	arrow.erase(arrow.begin());
 		    	missile.erase(missile.begin()+j);
-		    	for(int i=1;i<cannon.size();i++)
-				{
-					if((mod(player.position.x - cannon[i].position.x) + mod(player.position.z - cannon[i].position.z)) < (mod(player.position.x - cannon[0].position.x) + mod(player.position.y - cannon[0].position.y)))
+		  		for(int i=1;i<cannon.size();i++)
+				{	
+					if((abs(player.position.x - cannon[i].position.x) + abs(player.position.z - cannon[i].position.z)) < (abs(player.position.x - cannon[0].position.x) + abs(player.position.z - cannon[0].position.z)))
 					{
-						Enemy a;
+						Enemy a,b;
 						a=cannon[i];
 						cannon[i]=cannon[0];
 						cannon[0]=a;
-						a=flag[i];
-						flag[i]=flag[0];
-						flag[0]=a;
+						b=arrow[i];
+						arrow[i]=arrow[0];
+						arrow[0]=b;
 					}			
 				}
     			score+=100;
@@ -469,15 +477,15 @@ void detect_collision() {
 		    		bomb.erase(bomb.begin()+j);
     		    	for(int i=1;i<cannon.size();i++)
 					{
-						if(mod(player.position.x - cannon[i].position.x) + mod(player.position.z - cannon[i].position.z) < mod(player.position.x - cannon[0].position.x) + mod(player.position.y - cannon[0].position.y))
+						if(mod(player.position.x - cannon[i].position.x) + mod(player.position.z - cannon[i].position.z) < mod(player.position.x - cannon[0].position.x) + mod(player.position.z - cannon[0].position.z))
 						{
 							Enemy a;
 							a=cannon[i];
 							cannon[i]=cannon[0];
 							cannon[0]=a;
-							a=flag[i];
-							flag[i]=flag[0];
-							flag[0]=a;
+							a=arrow[i];
+							arrow[i]=arrow[0];
+							arrow[0]=a;
 						}			
 					}
     				score+=100;
