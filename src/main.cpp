@@ -14,14 +14,20 @@ glm::vec3 eye,target,up;
 * Customizable functions *
 **************************/
 long long int frame = 0;
+int check=0;
 int view_change = 0;
+int accelerator = 0;
 int shoot = 0;
 int enemy_shoot = 0;
 double fuel_level = 5.0;
+int score =0;
 int damage = 50;
 double pxpos, pypos;
 double cam_heli_x,cam_heli_y;
 Dashboard board[3];
+Dashboard speedometer;
+Dashboard compass;
+Dashboard pointers[50];
 vector<Enemy> land;
 vector<Enemy> fuel;
 vector<Enemy> cannon;
@@ -33,13 +39,14 @@ vector<Enemy> bomb_enemy;
 vector<Enemy> missile;
 vector<Enemy> boat;
 vector<Enemy> ring;
+vector<Enemy> parachute;
 
 Ball player;
 Bg background;
 
-int width  = 1000;
-int height = 800;
-int view=0;
+int width  = 1600;
+int height = 1600;
+int view=2;
 
 void detect_collision();
 
@@ -57,10 +64,24 @@ void draw() {
     up = glm::vec3(0,1,0);
     Matrices.view = glm::lookAt( eye, target, up );
     glm::mat4 VP2 = Matrices.projection2 * Matrices.view;
-    board[0].draw(VP2,-3.7,-2.5,0,0.8*fuel_level,COLOR_BROWN);
-    board[1].draw(VP2,-3.7,-2.8,0,0.8*player.position.y,COLOR_RED);
-    board[2].draw(VP2,-3.7,-3.1,0,0.12*damage,COLOR_YELLOW);
-
+    board[0].draw(VP2,-3.7,-2.5,0,0.8*fuel_level,COLOR_BROWN,0);
+    board[1].draw(VP2,-3.7,-2.8,0,0.8*player.position.y,COLOR_RED,0);
+    board[2].draw(VP2,-3.7,-3.1,0,0.12*damage,COLOR_YELLOW,0);
+    speedometer.draw(VP2,3,3,0,player.speed,COLOR_YELLOW,1);
+    compass.draw(VP2,-3,3,0,player.speed,COLOR_YELLOW,2);
+    pointers[0].draw(VP2,-3,3,0,player.rotationy,COLOR_ORANGE,3);
+    pointers[1].draw(VP2,(cannon[0].position.x - player.position.x)/100-3,(cannon[0].position.z - player.position.z)/100 +3,0,player.speed,COLOR_BLACK,4);
+    int total=2;
+    for(int i=0;i<volcano.size() && total<50;i++)
+    {
+    	if((mod((volcano[i].position.x - player.position.x)/100)*mod((volcano[i].position.x - player.position.x)/100) + mod((volcano[i].position.z - player.position.z)/100)*mod((volcano[i].position.z - player.position.z)/100)) < 1)
+    		pointers[total++].draw(VP2,(volcano[i].position.x - player.position.x)/100-3,(volcano[i].position.z - player.position.z)/100 + 3,0,player.speed,COLOR_RED,4);
+    }
+    for(int i=0;i<fuel.size() && total<50;i++)
+    {
+    	if((mod((fuel[i].position.x - player.position.x)/100)*mod((fuel[i].position.x - player.position.x)/100) + mod((fuel[i].position.z - player.position.z)/100)*mod((fuel[i].position.z - player.position.z)/100)) < 1)
+    		pointers[total++].draw(VP2,(fuel[i].position.x - player.position.x)/100-3,(fuel[i].position.z - player.position.z)/100 + 3,0,player.speed,COLOR_GREEN,4);
+    }
     if(view==0)//top
     {
    		eye = glm::vec3( player.position.x , player.position.y + 30, player.position.z + 1);
@@ -100,7 +121,7 @@ void draw() {
         float eye_x = player.position.x + (20-10*screen_zoom)*cos(cam_heli_x*M_PI/180.0f)*sin(cam_heli_y*M_PI/180.0f);
         float eye_y = player.position.y + (20-10*screen_zoom)*cos(cam_heli_y*M_PI/180.0f);
         float eye_z = player.position.z + (20-10*screen_zoom)*sin(cam_heli_x*M_PI/180.0f)*sin(cam_heli_y*M_PI/180.0f);
-
+        if(eye_y<0.3)eye_y=0.3;
         eye = glm::vec3(eye_x,eye_y,eye_z);
         up = glm::vec3(0,1,0);
 	}
@@ -114,8 +135,8 @@ void draw() {
     	land[i].draw(VP);
     for(int i=0;i<fuel.size();i++)
     	fuel[i].draw(VP);
-    for(int i=0;i<cannon.size();i++)
-    	cannon[i].draw(VP);
+    if(cannon.size()>0)
+	    cannon[0].draw(VP);
     if(arrow.size()>0)
 	    arrow[0].draw(VP);
     for(int i=0;i<volcano.size();i++)
@@ -130,6 +151,8 @@ void draw() {
     	missile[i].draw(VP);
     for(int i=0;i<boat.size();i++)
     	boat[i].draw(VP);
+    for(int i=0;i<parachute.size();i++)
+    	parachute[i].draw(VP);
     player.draw(VP);
 }
 
@@ -138,6 +161,7 @@ void tick_input(GLFWwindow *window) {
     int front  = glfwGetKey(window, GLFW_KEY_UP);
     int right  = glfwGetKey(window, GLFW_KEY_RIGHT);
     int back  = glfwGetKey(window, GLFW_KEY_DOWN);
+    int acc  = glfwGetKey(window, GLFW_KEY_SPACE);
     int bo  = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT);
     int mis  = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT);
     int v = glfwGetKey(window, GLFW_KEY_V);
@@ -148,14 +172,21 @@ void tick_input(GLFWwindow *window) {
     int z = glfwGetKey(window, GLFW_KEY_Z);
     int x = glfwGetKey(window, GLFW_KEY_X);
     
-    if(a)
-    	player.rotate(1);
-    if(d)
-    	player.rotate(2);
-    if(z)
-    	player.rotate(3);
-    if(x)
-    	player.rotate(4);
+    if(acc)
+    {
+    	accelerator++;
+    	player.speed = 0.2 + 0.002*accelerator;
+    	if(player.speed > 0.57) player.speed = 0.57;
+    }
+    else
+    {
+    	accelerator=0;
+    	player.speed = 0.2;
+    }
+    if(a)player.rotate(1);
+    if(d)player.rotate(2);
+    if(z)player.rotate(3);
+    if(x)player.rotate(4);
     
     if(mis && shoot  == 0)
     {
@@ -227,6 +258,9 @@ void tick_elements() {
     for(int i=0;i<bomb_enemy.size();i++)
     	bomb_enemy[i].enemybomb();
 
+    for(int i=0;i<parachute.size();i++)
+    	parachute[i].parachute();
+
     for(int i=0;i<bomb_enemy.size();i++)
     	if(bomb_enemy[i].time - frame > 1200)
          	bomb_enemy.erase(bomb_enemy.begin()+i);
@@ -240,10 +274,20 @@ void tick_elements() {
 }
 
 void dead(){
+	if(player.position.y < 0)
+    	printf("SORRY! SUBMERGED UNDERWATER\n");
+    else if(fuel_level < 0 )
+    	printf("SORRY! FUEL EXHAUSTED\n");
+    else if(damage <= 0)
+    	printf("SORRY! EXCESSIVE DAMAGE CAUSED BY ENEMIES\n");
+    else
+    	printf("SORRY! PLAYER DIED DUE TO CLOSE PROXIMITY OF VOLCANO\n");
 	printf(" ___   _   __  _______    ___ _   _________\n");
     printf("/  _| /_\\ |  \\/  | __|   / _ \\ \\ / / __| _ \\\n");
     printf("| ( |/ _ \\| |\\/| | _|    | () \\ V /| _||   /\n");
     printf("\\___/_/ \\_\\_|  |_|___|   \\___/ \\_/ |___|_|_\\\n");
+    printf("BETTER LUCK NEXT TIME\n");
+    printf("YOUR FINAL SCORE = %d\n YOU REQUIRED TO CLEAR %d CHECK-POINTS\n",score,5-check);
 	quit(window);
 }
 
@@ -252,22 +296,38 @@ void initGL(GLFWwindow *window, int width, int height) {
     background   = Bg(0,0,0,COLOR_BLUE);
     for(int i=0;i<30;i++)
     for(int k=0;k<30;k++)
-    if(rand()%2==0)
-    {
-    	land.push_back(Enemy(i*10,0.1,k*10 + 3,COLOR_GREEN,1));
-    	if(rand()%30 == 0)
+    	if(rand()%2==0)
     	{
-    		cannon.push_back(Enemy(i*10,0.3,k*10+3,COLOR_BLACK,7));
-    		arrow.push_back(Enemy(i*10,2,k*10+3,COLOR_RED,8));
-    	}
-    	else if(rand()%3 == 0)
-    		fuel.push_back(Enemy(i*10,1,k*10 + 3,COLOR_BROWN,2));
-    	else if(rand()%6 == 1)
-    		volcano.push_back(Enemy(i*10,0.1,k*10 + 3,COLOR_BLACK,3));
+    		land.push_back(Enemy(i*10,0.1,k*10 + 3,COLOR_GREEN,1));
+    		if(rand()%30 == 0)
+    		{
+    			cannon.push_back(Enemy(i*10,0.3,k*10+3,COLOR_BLACK,7));
+    			arrow.push_back(Enemy(i*10,2,k*10+3,COLOR_RED,8));
+    		}
+    		else if(rand()%3 == 0)
+    			fuel.push_back(Enemy(i*10,1,k*10 + 3,COLOR_BROWN,2));
+    		else if(rand()%10 == 1)
+    			volcano.push_back(Enemy(i*10,0.1,k*10 + 3,COLOR_BLACK,3));
+		}
+		else
+		{
+    		boat.push_back(Enemy(i*10,0.3,k*10 + 3,COLOR_BLACK,6));
+    		if(rand()%30 == 0)
+			    parachute.push_back(Enemy(i*10,4.3,k*10 + 3, COLOR_BROWN,10));
+		}
+	for(int i=1;i<cannon.size();i++)
+	{
+		if((mod(player.position.x - cannon[i].position.x) + mod(player.position.z - cannon[i].position.z)) < (mod(player.position.x - cannon[0].position.x) + mod(player.position.y - cannon[0].position.y)))
+		{
+			Enemy a;
+			a=cannon[i];
+			cannon[i]=cannon[0];
+			cannon[0]=a;
+			a=flag[i];
+			flag[i]=flag[0];
+			flag[0]=a;
+		}			
 	}
-	else
-    	boat.push_back(Enemy(i*10,0.3,k*10 + 3,COLOR_BLACK,6));
-
     programID = LoadShaders("Sample_GL.vert", "Sample_GL.frag");
     Matrices.MatrixID = glGetUniformLocation(programID, "MVP");
     reshapeWindow (window, width, height);
@@ -276,7 +336,7 @@ void initGL(GLFWwindow *window, int width, int height) {
     glEnable (GL_DEPTH_TEST);
     glDepthFunc (GL_LEQUAL);
 }
-
+char display[100];
 
 int main(int argc, char **argv) {
     srand(time(0));
@@ -294,6 +354,7 @@ int main(int argc, char **argv) {
             if(frame%60 == 0 )view_change = 0;
             if(frame%20 == 0 )shoot = 0;
             if(frame%60 == 0 )enemy_shoot = 0;
+            if(frame%6 == 0 )score++;
 
             if( (frame-60)%960 == 0 )
             	ring.push_back(Enemy(player.position.x + 1 +rand()%3,player.position.y,player.position.z + 1 + rand()%3 ,COLOR_BLACK,9));
@@ -303,10 +364,18 @@ int main(int argc, char **argv) {
             frame++;
             fuel_level-=0.001;
             fuel_level=min(5.0,fuel_level);
+            detect_collision();
+            sprintf(display,"WELCOME  TO THE PIRATE-WORLD           YOUR SCORE : %d\n",score);
+ 		   glfwSetWindowTitle(window,display);
+ 		   if(check == 5)
+ 		   {
+ 		   		printf("CONGRATS! YOU CLEARED ALL 5 CHECK-POINTS\n");
+			    printf("YOUR FINAL SCORE = %d\n",score);
+ 			   	quit(window);
+ 		   }
         }
         // Poll for Keyboard and mouse events
         glfwPollEvents();
-        detect_collision();
     }
     quit(window);
 }
@@ -316,7 +385,7 @@ void detect_collision() {
 	for(int i=0;i<fuel.size();i++)
     if(mod(fuel[i].position.x-player.position.x)<=0.3 && mod(fuel[i].position.y-player.position.y)<=0.3 && mod(fuel[i].position.z-player.position.z)<=0.3)
     {
-    	fuel_level++;
+    	fuel_level = 5.0f;
     	fuel.erase(fuel.begin()+i);
     }
     //volcano
@@ -335,16 +404,32 @@ void detect_collision() {
     		{
     			boat.erase(boat.begin()+i);
     			missile.erase(missile.begin()+j);
+    			score+=30;
     		}
 
     //cannon-missile
     for(int i=0;i<cannon.size();i++)
     	for(int j=0;j<missile.size();j++)
-		    if( mod(cannon[i].position.x-missile[j].position.x) <= 0.4 && mod(cannon[i].position.y-missile[j].position.y)<=0.4 && mod(cannon[i].position.z-missile[j].position.z)<=0.4)
+		    if( mod(cannon[i].position.x-missile[j].position.x) <= 0.4 && mod(cannon[i].position.y-missile[j].position.y)<=0.4 && mod(cannon[i].position.z-missile[j].position.z)<=0.7)
 		    {
 		    	cannon.erase(cannon.begin()+i);
 		    	arrow.erase(arrow.begin()+i);
 		    	missile.erase(missile.begin()+j);
+		    	for(int i=1;i<cannon.size();i++)
+				{
+					if((mod(player.position.x - cannon[i].position.x) + mod(player.position.z - cannon[i].position.z)) < (mod(player.position.x - cannon[0].position.x) + mod(player.position.y - cannon[0].position.y)))
+					{
+						Enemy a;
+						a=cannon[i];
+						cannon[i]=cannon[0];
+						cannon[0]=a;
+						a=flag[i];
+						flag[i]=flag[0];
+						flag[0]=a;
+					}			
+				}
+    			score+=100;
+    			check++;
 		    }
 
 	//missile - land	   
@@ -363,6 +448,7 @@ void detect_collision() {
     		{
     			boat.erase(boat.begin()+i);
     			bomb.erase(bomb.begin()+j);
+    			score+=30;
     		}
     //land-bomb
     for(int i=0;i<land.size();i++)
@@ -376,11 +462,26 @@ void detect_collision() {
     //cannon-bomb
     for(int i=0;i<cannon.size();i++)
     	for(int j=0;j<bomb.size();j++)
-		    if( mod(cannon[i].position.x-bomb[j].position.x) <= 0.3 && mod(cannon[i].position.y-bomb[j].position.y)<=0.3 && mod(cannon[i].position.z-bomb[j].position.z)<=0.3)
+		    if( mod(cannon[i].position.x-bomb[j].position.x) <= 0.3 && mod(cannon[i].position.y-bomb[j].position.y)<=0.4 && mod(cannon[i].position.z-bomb[j].position.z)<=0.3)
 		    	{
 		    		cannon.erase(cannon.begin()+i);
 		    		arrow.erase(arrow.begin()+i);
-		    		missile.erase(missile.begin()+j);
+		    		bomb.erase(bomb.begin()+j);
+    		    	for(int i=1;i<cannon.size();i++)
+					{
+						if(mod(player.position.x - cannon[i].position.x) + mod(player.position.z - cannon[i].position.z) < mod(player.position.x - cannon[0].position.x) + mod(player.position.y - cannon[0].position.y))
+						{
+							Enemy a;
+							a=cannon[i];
+							cannon[i]=cannon[0];
+							cannon[0]=a;
+							a=flag[i];
+							flag[i]=flag[0];
+							flag[0]=a;
+						}			
+					}
+    				score+=100;
+    				check++;
 		    	}
 
 	//enemybomb-player
@@ -395,15 +496,39 @@ void detect_collision() {
 	for(int i=0;i<ring.size();i++)
 	    if( mod(ring[i].position.x-player.position.x) <= 0.2 && mod(ring[i].position.y-player.position.y)<=0.1 && mod(ring[i].position.z-player.position.z)<=0.3)
 		    {
+		    	score+=60;
 		    	ring.erase(ring.begin()+i);
 		    }
+
+	//parachute-missile
+    for(int i=0;i<parachute.size();i++)
+    	for(int j=0;j<missile.size();j++)
+		    if( mod(parachute[i].position.x-missile[j].position.x) <= 0.4 && mod(parachute[i].position.y-2-missile[j].position.y)<=0.4 && mod(parachute[i].position.z-missile[j].position.z)<=0.4)
+		    {
+		    	parachute.erase(parachute.begin()+i);
+		    	missile.erase(missile.begin()+j);
+    			score+=50;
+		    }
+	//parachute-bomb
+    for(int i=0;i<parachute.size();i++)
+    	for(int j=0;j<bomb.size();j++)
+		    if( mod(parachute[i].position.x-bomb[j].position.x) <= 0.3 && mod(parachute[i].position.y-2-bomb[j].position.y)<=0.4 && mod(parachute[i].position.z-bomb[j].position.z)<=0.3)
+		    	{
+		    		parachute.erase(parachute.begin()+i);
+		    		bomb.erase(bomb.begin()+j);
+    				score+=50;
+		    	}
 }
 
 void reset_screen() {
-    float view    = screen_center_y + 4 / screen_zoom;
-    float bottom = screen_center_y - 4 / screen_zoom;
-    float left   = screen_center_x - 4 / screen_zoom;
-    float right  = screen_center_x + 4 / screen_zoom;
+    float view    = screen_center_y + 4 ;
+    float bottom = screen_center_y - 4 ;
+    float left   = screen_center_x - 4 ;
+    float right  = screen_center_x + 4 ;
     Matrices.projection2 = glm::ortho(left, right, bottom, view, 0.1f, 500.0f);
+     view    = screen_center_y + 4 / screen_zoom;
+     bottom = screen_center_y - 4 / screen_zoom;
+     left   = screen_center_x - 4 / screen_zoom;
+     right  = screen_center_x + 4 / screen_zoom;
     Matrices.projection = glm::perspective(glm::radians(45.0f),3.0f/4.0f,0.1f,100.0f);
 }

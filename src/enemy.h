@@ -14,6 +14,7 @@ public:
     void boom(float rotationx , float rotationy);
     void missile();
     void enemybomb();
+    void parachute();
     double speed;
 
     int time;
